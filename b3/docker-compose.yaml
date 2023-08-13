@@ -1,0 +1,42 @@
+version: '3.7'
+volumes:
+  step2_db:
+secrets:
+  step2_db_passwd:
+    file: secret_step2_db_passwd.txt
+  step2_db_url:
+    file: secret_step2_db_url.txt
+networks:
+  step2:
+services:
+  step2_db:
+    container_name: "step2_db"
+    image: "postgres:15"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "keyserver"
+      POSTGRES_DB: "keyserver"
+      POSTGRES_PASSWORD_FILE: "/run/secrets/step2_db_passwd"
+    volumes:
+      - step2_db:/var/lib/postgresql/data
+    secrets:
+      - step2_db_passwd
+    networks:
+      - step2
+  step2_keyserver:
+    container_name: "step2_keyserver"
+    image: "t2bot/matrix-key-server:latest"
+    restart: unless-stopped
+    depends_on:
+      - step2_db
+    environment:
+      ADDRESS: "0.0.0.0"
+      PORT: "8080"
+      DOMAIN: "2.s.resolvematrix.dev"
+      POSTGRES: "/run/secrets/step2_db_url"
+    ports:
+      - "127.0.0.1:7642:8080"
+    secrets:
+      - step2_db_url
+    networks:
+      - step2

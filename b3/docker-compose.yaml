@@ -32,7 +32,7 @@ services:
     environment:
       ADDRESS: "0.0.0.0"
       PORT: "8080"
-      DOMAIN: "2.s.resolvematrix.dev"
+      DOMAIN: "2.s.resolvematrix.dev:7652"
       POSTGRES: "/run/secrets/step2_db_url"
     ports:
       - "127.0.0.1:7642:8080"

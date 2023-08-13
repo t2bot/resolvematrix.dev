@@ -5,12 +5,14 @@ volumes:
   step3d_db:
   step4_db:
   step3c_msc4040_db:
+  step4_msc4040_db:
 networks:
   step3b:
   step3c:
   step3d:
   step4:
   step3c_msc4040:
+  step4_msc4040:
 secrets:
   step3b_db_passwd:
     file: secret_step3b_db_passwd.txt
@@ -36,6 +38,11 @@ secrets:
     file: secret_step3c_msc4040_db_passwd.txt
   step3c_msc4040_db_url:
     file: secret_step3c_msc4040_db_url.txt
+
+  step4_msc4040_db_passwd:
+    file: secret_step4_msc4040_db_passwd.txt
+  step4_msc4040_db_url:
+    file: secret_step4_msc4040_db_url.txt
 services:
   # --- Step 3b ---
   step3b_db:
@@ -201,3 +208,36 @@ services:
       - step3c_msc4040_db_url
     networks:
       - step3c_msc4040
+
+  # --- Step 4 [MSC4040] ---
+  step4_msc4040_db:
+    container_name: "step4_msc4040_db"
+    image: "postgres:15"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "keyserver"
+      POSTGRES_DB: "keyserver"
+      POSTGRES_PASSWORD_FILE: "/run/secrets/step4_msc4040_db_passwd"
+    volumes:
+      - step4_msc4040_db:/var/lib/postgresql/data
+    secrets:
+      - step4_msc4040_db_passwd
+    networks:
+      - step4_msc4040
+  step4_msc4040_keyserver:
+    container_name: "step4_msc4040_keyserver"
+    image: "t2bot/matrix-key-server:latest"
+    restart: unless-stopped
+    depends_on:
+      - step4_msc4040_db
+    environment:
+      ADDRESS: "0.0.0.0"
+      PORT: "8080"
+      DOMAIN: "4.msc4040.s.resolvematrix.dev"
+      POSTGRES: "/run/secrets/step4_msc4040_db_url"
+    ports:
+      - "127.0.0.1:7145:8080"
+    secrets:
+      - step4_msc4040_db_url
+    networks:
+      - step4_msc4040

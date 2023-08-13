@@ -1,0 +1,42 @@
+version: '3.7'
+volumes:
+  step3b_db:
+secrets:
+  step3b_db_passwd:
+    file: secret_step3b_db_passwd.txt
+  step3b_db_url:
+    file: secret_step3b_db_url.txt
+networks:
+  step3b:
+services:
+  step3b_db:
+    container_name: "step3b_db"
+    image: "postgres:15"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "keyserver"
+      POSTGRES_DB: "keyserver"
+      POSTGRES_PASSWORD_FILE: "/run/secrets/step3b_db_passwd"
+    volumes:
+      - step3b_db:/var/lib/postgresql/data
+    secrets:
+      - step3b_db_passwd
+    networks:
+      - step3b
+  step3b_keyserver:
+    container_name: "step3b_keyserver"
+    image: "t2bot/matrix-key-server:latest"
+    restart: unless-stopped
+    depends_on:
+      - step3b_db
+    environment:
+      ADDRESS: "0.0.0.0"
+      PORT: "8080"
+      DOMAIN: "2.s.resolvematrix.dev:7753"
+      POSTGRES: "/run/secrets/step3b_db_url"
+    ports:
+      - "127.0.0.1:7743:8080"
+    secrets:
+      - step3b_db_url
+    networks:
+      - step3b

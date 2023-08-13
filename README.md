@@ -2,7 +2,7 @@
 
 Docker Compose files for resolvematrix.dev servers.
 
-See [t2bot.io/docs/resolvematrix.dev](https://t2bot.io/docs/resolvematrix) for more information.
+See [t2bot.io/docs/resolvematrix](https://t2bot.io/docs/resolvematrix) for more information.
 
 ---
 

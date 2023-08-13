@@ -1,14 +1,15 @@
 version: '3.7'
 volumes:
   step2_db:
+networks:
+  step2:
 secrets:
   step2_db_passwd:
     file: secret_step2_db_passwd.txt
   step2_db_url:
     file: secret_step2_db_url.txt
-networks:
-  step2:
 services:
+  # --- Step 2 ---
   step2_db:
     container_name: "step2_db"
     image: "postgres:15"

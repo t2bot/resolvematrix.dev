@@ -3,10 +3,12 @@ volumes:
   step3b_db:
   step3c_db:
   step3d_db:
+  step4_db:
 networks:
   step3b:
   step3c:
   step3d:
+  step4:
 secrets:
   step3b_db_passwd:
     file: secret_step3b_db_passwd.txt
@@ -22,6 +24,11 @@ secrets:
     file: secret_step3d_db_passwd.txt
   step3d_db_url:
     file: secret_step3d_db_url.txt
+
+  step4_db_passwd:
+    file: secret_step4_db_passwd.txt
+  step4_db_url:
+    file: secret_step4_db_url.txt
 services:
   # --- Step 3b ---
   step3b_db:
@@ -121,3 +128,36 @@ services:
       - step3d_db_url
     networks:
       - step3d
+
+  # --- Step 4 ---
+  step4_db:
+    container_name: "step4_db"
+    image: "postgres:15"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "keyserver"
+      POSTGRES_DB: "keyserver"
+      POSTGRES_PASSWORD_FILE: "/run/secrets/step4_db_passwd"
+    volumes:
+      - step4_db:/var/lib/postgresql/data
+    secrets:
+      - step4_db_passwd
+    networks:
+      - step4
+  step4_keyserver:
+    container_name: "step4_keyserver"
+    image: "t2bot/matrix-key-server:latest"
+    restart: unless-stopped
+    depends_on:
+      - step4_db
+    environment:
+      ADDRESS: "0.0.0.0"
+      PORT: "8080"
+      DOMAIN: "4.s.resolvematrix.dev"
+      POSTGRES: "/run/secrets/step4_db_url"
+    ports:
+      - "127.0.0.1:7845:8080"
+    secrets:
+      - step4_db_url
+    networks:
+      - step4
